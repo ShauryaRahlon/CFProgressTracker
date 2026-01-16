@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Contest from '@/models/Contest';
+import { auth } from "@/lib/auth";
 
 export const revalidate = 3600;
 
 export async function GET(req: NextRequest) {
     try {
+        const session = await auth();
+        if (!session?.user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         await connectDB();
         const { searchParams } = new URL(req.url);
         const page = parseInt(searchParams.get('page') || '1');

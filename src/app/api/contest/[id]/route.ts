@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Performance from '@/models/Performance';
+import { auth } from "@/lib/auth";
 
 export const revalidate = 3600;
 export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         await connectDB();
         const contestId = parseInt(params.id);
         const results = await Performance.find({ contestId: contestId })
