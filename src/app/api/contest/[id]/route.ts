@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Performance from '@/models/Performance';
 import { auth } from "@/lib/auth";
 
 export const revalidate = 3600;
 export async function GET(
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -13,7 +14,11 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
         await connectDB();
-        const contestId = parseInt(params.id);
+        const { id } = await params;
+        const contestId = parseInt(id);
+        if (isNaN(contestId)) {
+            return NextResponse.json({ error: "Invalid Contest ID" }, { status: 400 });
+        }
         const results = await Performance.find({ contestId: contestId })
             .sort({ rank: 1 })
             .populate({

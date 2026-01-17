@@ -1,10 +1,10 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import path from 'path';
-import { connectDB } from '../lib/db';
-import Contest from '../models/Contest';
-import Student from '../models/Student';
-import Performance from '../models/Performance';
+import { connectDB } from '../src/lib/db';
+import Contest from '../src/models/Contest';
+import Student from '../src/models/Student';
+import Performance from '../src/models/Performance';
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 const CF_API = "https://codeforces.com/api";
 const BATCH_SIZE = 50;

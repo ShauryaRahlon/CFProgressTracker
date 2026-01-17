@@ -36,9 +36,17 @@ const PerformanceSchema = new Schema<IPerformanceDocument>(
         },
     },
     {
-        timestamps: true
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
 );
+PerformanceSchema.virtual('contest', {
+    ref: 'Contest',
+    localField: 'contestId',
+    foreignField: 'id',
+    justOne: true
+});
 
 PerformanceSchema.index({ contestId: 1, rank: 1 });
 PerformanceSchema.index({ handle: 1, contestId: -1 });
