@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Performance from '@/models/Performance';
+import Student from '@/models/Student';
 import { auth } from "@/lib/auth";
 
 export const revalidate = 3600;
@@ -23,6 +24,7 @@ export async function GET(
             .sort({ rank: 1 })
             .populate({
                 path: 'student',
+                model: Student,
                 select: 'name enrolment batch'
             })
             .lean();

@@ -11,8 +11,8 @@ export async function GET(
 ) {
     try {
         await connectDB();
-        // const session = await auth();
-        // if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const session = await auth();
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         const { handle } = await params;
         const student = await Student.findOne({
             cfHandle: { $regex: new RegExp(`^${handle}$`, 'i') }
