@@ -1,22 +1,25 @@
 import Link from "next/link"
-import { getContests } from "@/lib/mock-api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getContests } from "@/lib/db-queries"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge, getContestBadgeVariant } from "@/components/ui/badge"
 import { Select } from "@/components/ui/select"
+import { SearchInput } from "@/components/SearchInput"
 
 export default async function DashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { page, type } = await searchParams
-  const currentPage = Number(page) || 1
-  const currentType = (type as string) || "All"
+  const resolved = await searchParams
+  const currentPage = Number(resolved.page) || 1
+  const currentType = (resolved.type as string) || "All"
+  const currentSearch = (resolved.q as string) || ""
 
   const { data: contests, pagination } = await getContests({
     page: currentPage,
     type: currentType,
+    search: currentSearch,
   })
 
   const formatDate = (seconds: number) => {
@@ -41,15 +44,16 @@ export default async function DashboardPage({
 
       {/* Filter */}
       <div className="flex items-center gap-3 mb-6 animate-in" style={{ animationDelay: '0.1s' }}>
-        <form className="flex items-center gap-2">
+        <form className="flex items-center gap-2 w-full">
           <input type="hidden" name="page" value="1" />
-          <Select name="type" defaultValue={currentType} className="w-40 text-sm">
+          <SearchInput placeholder="Search contests…" defaultValue={currentSearch} />
+          <Select name="type" defaultValue={currentType} className="w-36 text-sm">
             <option value="All">All</option>
             <option value="Div. 1">Div. 1</option>
             <option value="Div. 2">Div. 2</option>
             <option value="Div. 3">Div. 3</option>
           </Select>
-          <Button type="submit" variant="secondary" size="sm">Filter</Button>
+          <Button type="submit" variant="secondary" size="sm">Search</Button>
         </form>
       </div>
 

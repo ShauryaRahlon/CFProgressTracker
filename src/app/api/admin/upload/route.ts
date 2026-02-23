@@ -19,24 +19,52 @@ export async function POST(req: NextRequest) {
         const workbook = XLSX.read(buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const rawData = XLSX.utils.sheet_to_json(sheet);
+        // Read raw rows (as arrays) to auto-detect which row is the header
+        const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const headerRowIndex = rawRows.findIndex((row: any[]) =>
+            row.some((cell: any) => typeof cell === 'string' && cell.toLowerCase().includes('name')) &&
+            row.some((cell: any) => typeof cell === 'string' && cell.toLowerCase().includes('enrollment') || (typeof cell === 'string' && cell.toLowerCase().includes('enrolment')))
+        );
+        if (headerRowIndex === -1) {
+            return NextResponse.json({ error: `Could not find header row. Found columns: ${rawRows[0]?.join(', ')}` }, { status: 400 });
+        }
+        const rawData = XLSX.utils.sheet_to_json(sheet, { range: headerRowIndex });
         if (rawData.length === 0) {
             return NextResponse.json({ error: 'Sheet is empty' }, { status: 400 });
         }
         await connectDB();
-        const ops = rawData.map((row: any) => ({
-            updateOne: {
-                filter: { enrolment: row.Enrolment.toString().trim().toUpperCase() },
-                update: {
-                    $set: {
-                        name: row.Name.trim(),
-                        cfHandle: row.Handle.toString().trim(),
-                        batch: row.Batch.toString().trim(),
-                    }
-                },
-                upsert: true
+
+        const getField = (row: any, ...keys: string[]) => {
+            for (const k of keys) {
+                if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
             }
-        }));
+            // fallback: partial match
+            const found = Object.keys(row).find(rk => keys.some(k => rk.toLowerCase().includes(k.toLowerCase())));
+            return found ? row[found] : undefined;
+        };
+
+        const ops = rawData
+            .map((row: any) => {
+                const name = getField(row, 'Name')?.toString().trim();
+                const enrolment = getField(row, 'Enrollment Number', 'Enrolment', 'Enrolment Number', 'enrollment')?.toString().trim().toUpperCase();
+                const cfHandle = getField(row, 'Official Codeforces Handle / id', 'Handle', 'Codeforces Handle', 'CF Handle', 'handle')?.toString().trim();
+                const batchKey = Object.keys(row).find(k => k.toLowerCase().startsWith('batch'));
+                const batch = (batchKey ? row[batchKey] : getField(row, 'Batch'))?.toString().trim();
+                return { name, enrolment, cfHandle, batch };
+            })
+            .filter(r => r.enrolment) // only skip rows with no enrollment number
+            .map(({ name, enrolment, cfHandle, batch }) => ({
+                updateOne: {
+                    filter: { enrolment },
+                    update: { $set: { name, cfHandle, batch } },
+                    upsert: true,
+                }
+            }));
+
+        if (ops.length === 0) {
+            return NextResponse.json({ error: 'No valid rows found. Check column names match: Enrollment Number, Name, Official Codeforces Handle / id, Batch.' }, { status: 400 });
+        }
+
         const result = await Student.bulkWrite(ops);
         return NextResponse.json({
             message: 'Upload successful',

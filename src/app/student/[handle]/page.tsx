@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { getStudent } from "@/lib/mock-api"
+import { getStudent } from "@/lib/db-queries"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { RankChart } from "@/components/rank-chart"
+import { BackButton } from "@/components/BackButton"
 
 export default async function StudentPage({
   params,
@@ -33,9 +33,7 @@ export default async function StudentPage({
     <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Back */}
       <div className="mb-8 animate-in">
-        <Link href="/dashboard" className="text-sm text-white/40 hover:text-white transition-colors">
-          ← Back
-        </Link>
+        <BackButton />
       </div>
 
       {/* Profile */}

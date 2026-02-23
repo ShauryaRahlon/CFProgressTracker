@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { StudentProfile } from "@/lib/mock-api"
+import { StudentProfile } from "@/lib/db-queries"
 
 interface RankChartProps {
   history: StudentProfile["history"]
@@ -45,11 +45,10 @@ export function RankChart({ history }: RankChartProps) {
             <button
               key={opt}
               onClick={() => setFilterType(opt)}
-              className={`px-2 py-1 text-xs rounded transition-colors ${
-                filterType === opt
+              className={`px-2 py-1 text-xs rounded transition-colors ${filterType === opt
                   ? 'bg-white/10 text-white'
                   : 'text-white/40 hover:text-white/60'
-              }`}
+                }`}
             >
               {opt}
             </button>
@@ -67,8 +66,8 @@ export function RankChart({ history }: RankChartProps) {
                     <stop offset="100%" stopColor="rgba(255,255,255,0)" />
                   </linearGradient>
                 </defs>
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
@@ -81,7 +80,7 @@ export function RankChart({ history }: RankChartProps) {
                   width={40}
                 />
                 <Tooltip
-                  contentStyle={{ 
+                  contentStyle={{
                     background: 'rgba(0,0,0,0.8)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '8px',

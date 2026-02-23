@@ -47,7 +47,14 @@ export default function Navbar({ session }: NavbarProps) {
                             href="/dashboard"
                             className="text-white hover:text-blue-100 transition-colors font-medium"
                         >
-                            Dashboard
+                            Contests
+                        </Link>
+
+                        <Link
+                            href="/students"
+                            className="text-white hover:text-blue-100 transition-colors font-medium"
+                        >
+                            Students
                         </Link>
 
                         {session?.user?.role === "admin" && (
@@ -134,7 +141,13 @@ export default function Navbar({ session }: NavbarProps) {
                                 href="/dashboard"
                                 className="block text-white hover:bg-white/10 px-3 py-2 rounded-md"
                             >
-                                Dashboard
+                                Contests
+                            </Link>
+                            <Link
+                                href="/students"
+                                className="block text-white hover:bg-white/10 px-3 py-2 rounded-md"
+                            >
+                                Students
                             </Link>
                             {session?.user?.role === "admin" && (
                                 <Link
